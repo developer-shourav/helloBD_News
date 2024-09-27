@@ -1,23 +1,19 @@
-const express = require('express');
-const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-require('dotenv').config()
-const port = process.env.PORT || 5000 ;
+const express = require("express");
+const cors = require("cors");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
+const port = process.env.PORT || 5000;
 
 const app = express();
 
-
-
-
-// Middleware 
+// Middleware
 const corsConfig = {
-  origin: '*',
+  origin: "*",
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-  }
-app.use(cors(corsConfig))
-app.use(express.json())
-
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+};
+app.use(cors(corsConfig));
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.evuna6q.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -27,47 +23,44 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
-
 
 async function run() {
-    try {
-    
-      const latestNewsCollection = client.db('hellobdNews').collection('latestNews');
+  try {
+    const latestNewsCollection = client
+      .db("hellobdNews")
+      .collection("latestNews");
+
+    /* --------------------------------------
+              Get All News 
+  ------------------------------------------ */
+
+  /*----------- LatestNews ----------- */
+    app.get("/latestNews", async (req, res) => {
+      const latestNews = latestNewsCollection.find();
+      const result = await latestNews.toArray();
+      res.send(result);
+    });
 
 
-      /* ------ All Classes ------- */
-      app.get('/latestNews', async(req, res) => {
-
-        const classes = latestNewsCollection.find();
-        const result =  await classes.toArray();
-        res.send(result)
-      });
 
 
-     
-      // Send a ping to confirm a successful connection
-      await client.db("admin").command({ ping: 1 });
-      console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-      // Ensures that the client will close when you finish/error
-      /* await client.close(); */
-    }
+
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    /* await client.close(); */
   }
-  run().catch(console.dir);
-  
+}
+run().catch(console.dir);
 
-
-app.get('/' , (req, res) => {
-    res.send('Welcome to HelloBD News')
+app.get("/", (req, res) => {
+  res.send("Welcome to HelloBD News");
 });
 
-
-
-app.listen(port , () => {
-    console.log(`Our HelloBD News is running On the PORT:${port}`);
-})
-
-
-
+app.listen(port, () => {
+  console.log(`HelloBD News is running On the PORT:${port}`);
+});
